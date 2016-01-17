@@ -10,7 +10,18 @@ public class Message implements Serializable {
     private String text;
 
     public Message() {
+        date = new Date();
+    }
 
+    public Message(String text) {
+        this.text = text;
+        date = new Date();
+    }
+
+    public Message(String author, String text) {
+        this.author = author;
+        this.text = text;
+        date = new Date();
     }
 
     public String getAuthor() {
@@ -37,4 +48,15 @@ public class Message implements Serializable {
         this.text = text;
     }
 
+    @Override
+    public String toString() {
+//        StringBuilder sbuf = new StringBuilder();
+//        sbuf.append(author);
+//        sbuf.append(" [");
+//        sbuf.append(date);
+//        sbuf.append("]:");
+//        sbuf.append(text);
+//        return sbuf.toString();
+        return author + " [" + date + "]: " + text;
+    }
 }

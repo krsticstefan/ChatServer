@@ -11,7 +11,6 @@ public class DomaciZadatakChat {
     public static void main(String[] args) {
         // TODO code application logic here
         Server chatServer = new Server();
-        chatServer.startServer();
     }
     
 }
