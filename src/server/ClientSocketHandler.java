@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ClientSocketHandler implements Runnable {
 
@@ -18,6 +16,7 @@ public class ClientSocketHandler implements Runnable {
     public ClientSocketHandler(Socket client, int clientId) {
         this.client = client;
         this.clientId = clientId;
+        msg = new Message("Server", "Iniitial message"); //dodato za inicijalizaciju
         initInOutStream(client);
     }
 
