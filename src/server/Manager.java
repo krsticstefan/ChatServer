@@ -9,17 +9,13 @@ import java.util.List;
  */
 public class Manager {
 
-    private static List<Message> msgs;
-    private static List<ClientSocketHandler> clients;
+//    private static List<Message> msgs;
+    private static final List<ClientSocketHandler> clients;
 
-    public Manager() {
-        clients = new ArrayList<>(10);
+    static {
+        clients = new ArrayList<>();
     }
 
-    /**
-     *
-     * @param csh
-     */
     public static void addClient(ClientSocketHandler csh) {
         clients.add(csh);
     }

@@ -1,5 +1,6 @@
 package server;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -10,21 +11,23 @@ public class ClientSocketHandler implements Runnable {
     private final Socket client;
     private ObjectInputStream in;
     private ObjectOutputStream out;
-    private Message msg;
+    private String msg;
     private int clientId;
-    
+    private boolean connected;
+
     public ClientSocketHandler(Socket client, int clientId) {
         this.client = client;
         this.clientId = clientId;
-        msg = new Message("Server", "Iniitial message"); //dodato za inicijalizaciju
+        msg = "Server: Initial message";
         initInOutStream(client);
     }
 
-    private void initInOutStream(Socket client1) {
+    private void initInOutStream(Socket sock) {
         try {
-            out = new ObjectOutputStream(client1.getOutputStream());
-//            out.flush();
-            in = new ObjectInputStream(client1.getInputStream());
+            out = new ObjectOutputStream(sock.getOutputStream());
+            out.flush();
+            in = new ObjectInputStream(sock.getInputStream());
+            connected = true;
             System.out.println("--stream established");
         } catch (IOException ex) {
             System.out.println(ex);
@@ -33,17 +36,16 @@ public class ClientSocketHandler implements Runnable {
 
     private void init() {
         //last 100 messages (kada se implementira koriscenje liste u manageru)
-        //dodati preuzimanje imena sa Client
-        Message greet = new Message("Server", "Još jedna osoba se pridružila konverzaciji.");
+        String greet = "Server: Još jedna osoba se pridružila konverzaciji.";
         for (ClientSocketHandler handler : Manager.getClients()) {
             handler.broadcast(greet);
         }
     }
 
-    private synchronized void broadcast(Message message) {
+    private synchronized void broadcast(String message) {
         try {
             out.writeObject(message);
-//            out.flush();
+            out.flush();
         } catch (IOException ex) {
             System.out.println("Error broadcasting message: " + ex);
         }
@@ -51,12 +53,23 @@ public class ClientSocketHandler implements Runnable {
 
     @Override
     public void run() {
-//        init();
-        while (!msg.getText().equals("logout")) {
+        init();
+        while (connected) {
             try {
-                msg = (Message) in.readObject();
+                msg = (String) in.readObject();
                 for (ClientSocketHandler handler : Manager.getClients()) {
                     handler.broadcast(msg);
+                }
+            } catch (EOFException eofex) {
+                try {
+                    System.out.println("Client closed app: " + eofex);
+                    out.close();
+                    in.close();
+                    client.close();
+                    Manager.getClients().remove(this);
+                    connected = false;
+                } catch (IOException ex) {
+                    System.out.println("Error closing stram and socket: " + ex);
                 }
             } catch (IOException | ClassNotFoundException ex) {
                 System.out.println(ex);
