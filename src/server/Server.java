@@ -24,8 +24,8 @@ public class Server { //dodaj jednostavan GUI, sa prikazom broja klijenata i svi
             System.out.println("Server running; \nHost IP is " + InetAddress.getLocalHost() + ";\nListening on port " + PORT);
             while (true) {
                 Socket clientSocket = ss.accept();
-                System.out.println("Client accepted: " + ++clientCounter);
-                ClientSocketHandler csh = new ClientSocketHandler(clientSocket, clientCounter);
+                ClientSocketHandler csh = new ClientSocketHandler(clientSocket, ++clientCounter);
+                System.out.println("Client accepted: " + clientCounter);
                 Thread serverThread = new Thread(csh, "client[" + clientCounter + ']');
                 Manager.addClient(csh);
                 serverThread.start();
