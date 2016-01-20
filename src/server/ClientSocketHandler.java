@@ -54,27 +54,28 @@ public class ClientSocketHandler implements Runnable {
     @Override
     public void run() {
         init();
-        while (connected) {
-            try {
+        try {
+            while (connected) { //promenjeno bez testiranja!
                 msg = (String) in.readObject();
                 for (ClientSocketHandler handler : Manager.getClients()) {
                     handler.broadcast(msg);
                 }
-            } catch (EOFException eofex) {
-                try {
-                    System.out.println("Client closed app: " + eofex);
-                    out.close();
-                    in.close();
-                    client.close();
-                    Manager.getClients().remove(this);
-                    connected = false;
-                } catch (IOException ex) {
-                    System.out.println("Error closing stram and socket: " + ex);
-                }
-            } catch (IOException | ClassNotFoundException ex) {
-                System.out.println(ex);
             }
+        } catch (EOFException eofex) { //napravi elegantnije zatvaranje soketa i strimova klijenata
+            try {
+                System.out.println("Client closed app: " + eofex);
+                out.close();
+                in.close();
+                client.close();
+                Manager.getClients().remove(this);
+                connected = false;
+            } catch (IOException ex) {
+                System.out.println("Error closing stram and socket: " + ex);
+            }
+        } catch (IOException | ClassNotFoundException ex) {
+            System.out.println(ex);
         }
+        
     }
 
 }
