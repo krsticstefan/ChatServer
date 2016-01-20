@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Server {
+public class Server { //dodaj jednostavan GUI, sa prikazom broja klijenata i svih poruka, kao i opciju isključivanja servera
 
     private static final int PORT = 9000;
     ServerSocket ss;
