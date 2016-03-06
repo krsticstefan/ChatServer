@@ -3,7 +3,6 @@ package server;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.EOFException;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.InetAddress;
@@ -19,22 +18,29 @@ public class Server extends JFrame implements ActionListener {
 
     /* TODO:
      * odvojiti grafiku u posebnoj klasi
-     * omoguciti i iz clientSocketHandler da se salju poruke (client: name, has joined/left)
      */
     
-    private Thread t;
+    private static Thread t;
     private static final int PORT = 9000;
-    ServerSocket ss;
+    private static ServerSocket ss;
     private static int clientCounter = 0;
-    private boolean up;
+    private static boolean up;
 
-    private JPanel serverPnl;
-    private JButton startBtn, stopBtn;
-    private JTextArea konzolTxt;
+    private static JPanel serverPnl;
+    private static JButton startBtn, stopBtn;
+    private static JTextArea konzolTxt;
 
     public Server() {
         initGUI();
         up = true;
+    }
+    
+    public static void serverlog(String msg){
+        konzolTxt.append(msg);
+    }
+    
+    public static void clientLeft(){
+        konzolTxt.append("\nA client terminated connection, number of clients: " + --clientCounter);
     }
 
     private void initGUI() {
@@ -61,7 +67,7 @@ public class Server extends JFrame implements ActionListener {
             public void run() {
                 try {
                     ss = new ServerSocket(9000);
-                    konzolTxt.append("\nServer running; \nHost IP is "
+                    konzolTxt.append("\nServer running; \nHost is "
                             + InetAddress.getLocalHost() + ";\nListening on port " + PORT);
                     while (up) {
                         Socket clientSocket = ss.accept();
@@ -70,15 +76,11 @@ public class Server extends JFrame implements ActionListener {
                         Thread serverThread = new Thread(csh, "client[" + clientCounter + ']');
                         serverThread.start();
                     }
-                } catch (EOFException eofex) {
-                    System.out.println(eofex);
-                    konzolTxt.append("\nClient terminated connection: " + eofex);
-                    konzolTxt.append("\nClients left: " + --clientCounter);
                 } catch (BindException ex) {
                     konzolTxt.append("\nBusy! Port is in use: " + ex);
+                    System.out.println("startServer: " + ex);
                 } catch (IOException ex) {
-                    System.out.println(ex);
-                    konzolTxt.append("\nIO Exception: " + ex);
+                    System.out.println("startServer: " + ex);
                 }
             }
         });
@@ -106,9 +108,8 @@ public class Server extends JFrame implements ActionListener {
             konzolTxt.append("\n" + "Stopping server.");
             ss.close();
             t.interrupt();
-            startBtn.setVisible(true);
         } catch (IOException ex) {
-            konzolTxt.append("\n" + ex);
+            System.out.println("stopServer" + ex);
         }
     }
 }

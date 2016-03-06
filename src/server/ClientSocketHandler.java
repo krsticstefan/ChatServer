@@ -7,15 +7,12 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class ClientSocketHandler implements Runnable {
-
-    /* TODO:
-     *  ispis MESSAGES txt ili bazu periodicno (Manager.java, messageCounter)
-     */
+    
     private final Socket client;
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private String msg, username;
-    private int clientId;
+    private final int clientId;
     private boolean connected;
 
     public ClientSocketHandler(Socket client, int clientId) {
@@ -39,19 +36,21 @@ public class ClientSocketHandler implements Runnable {
 
     private void init() {
         String greet = " has joined the conversation!";
-        try {
+        try { //adding a new client
             username = (String) in.readObject();
             Manager.addClient(username, this);
         } catch (IOException | ClassNotFoundException ex) {
-            System.out.println("Error getting a username from new client. " + ex);
+            System.out.println("init: " + ex);
         }
-        try {
+        try { //sending messages to new client
             for (String msg : Manager.getMESSAGES()) {
                 out.writeObject(msg);
             }
         } catch (IOException ex) {
-            System.out.println("Error sending init-messages to client. " + ex);
+            Server.serverlog("\nError loading messages.");
+            System.out.println("init: " + ex);
         }
+        Manager.newMessage(username + greet);
         for (ClientSocketHandler handler : Manager.getCLIENTS().values()) {
             handler.broadcast(username + greet);
         }
@@ -62,7 +61,8 @@ public class ClientSocketHandler implements Runnable {
             out.writeObject(message);
             out.flush();
         } catch (IOException ex) {
-            System.out.println("Error broadcasting message: " + ex);
+            System.out.println("broadcast: " + ex);
+            Server.serverlog("\nError broadcasting message.");
         }
     }
 
@@ -75,6 +75,7 @@ public class ClientSocketHandler implements Runnable {
                 if (msg.contains("end123<>!")) {
                     msg = username + " has left the conversation.";
                     Manager.removeClient(username);
+                    Server.clientLeft();
                 }
                 Manager.newMessage(msg);
                 for (ClientSocketHandler handler : Manager.getCLIENTS().values()) {

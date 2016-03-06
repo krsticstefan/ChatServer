@@ -11,16 +11,8 @@ import java.util.Map;
 public class Manager {
 
     /* TODO:
-     * umesto String sasatviti poruku od username, datum, poruka (Message.java) (?)
      * ograniciti listu poruka na 100, ako klijent zadrazi prikaz starijih poruka, izvuci iz txt
-     */
-    
-    /*
-        If you want to serialize the ArrayList object to a file so you can read it back in again
-        later use ObjectOuputStream/ObjectInputStream writeObject()/readObject() 
-        since ArrayList implements Serializable. It's not clear to me from y
-        our question if you want to do this or just write each individual item. 
-        If so then Andrey's answer will do that.
+     * umesto String sasatviti poruku od username, datum, poruka (Message.java) (?)
      */
     
     private static final List<String> MESSAGES;
